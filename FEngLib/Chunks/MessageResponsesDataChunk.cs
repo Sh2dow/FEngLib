@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using FEngLib.Messaging;
 using FEngLib.Objects;
 using FEngLib.Packages;
@@ -8,7 +8,9 @@ namespace FEngLib.Chunks;
 
 public class MessageResponsesDataChunk : FrontendObjectChunk
 {
-    public MessageResponsesDataChunk(IObject<ObjectData> frontendObject) : base(frontendObject)
+    private readonly string _logReference = "Message";
+
+    public MessageResponsesDataChunk(IObject<ObjectData> frontendObject, HashResolver hashResolver) : base(frontendObject, hashResolver)
     {
     }
 
@@ -22,6 +24,7 @@ public class MessageResponsesDataChunk : FrontendObjectChunk
         {
             var tag = tagStream.NextTag();
             tagProcessor.ProcessTag(tag);
+            FrontendObject.Name = HashResolver.ResolveNameHash(FrontendObject.Name, FrontendObject.NameHash, _logReference);
         }
 
         ResponseHelpers.PopulateMessageResponseList(tagProcessor.MessageResponseEntryList, FrontendObject);

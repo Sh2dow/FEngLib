@@ -15,6 +15,7 @@ using FEngLib.Scripts;
 using FEngLib.Structures;
 using FEngRender.Data;
 using FEngViewer.Properties;
+using FEngViewer.Prompt;
 using JetBrains.Annotations;
 using Image = FEngLib.Objects.Image;
 
@@ -549,6 +550,66 @@ public partial class PackageView : Form
             return;
 
         _currentPackage.Objects.Remove(node.GetObject());
+        CurrentPackageWasModified();
+    }
+
+    private void cloneToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        if (treeView1.SelectedNode?.Tag is not RenderTreeNode node)
+            return;
+
+        var nodeObject = node.GetObject();
+
+        if (nodeObject is Group)
+            return;
+
+        var selectedObject = _currentPackage.Objects.Find(x => x.NameHash == nodeObject.NameHash);
+
+        if (selectedObject is null)
+            return;
+
+        var inputForm = new InputForm(CharacterCasing.Upper)
+        {
+            Input = selectedObject.Name
+        };
+
+        if (inputForm.ShowDialog() != DialogResult.OK)
+            return;
+
+        var inputHash = inputForm.Input.BinHash();
+
+        if (_currentPackage.Objects.Any(x => x.Name == inputForm.Input || x.NameHash == inputHash))
+        {
+            MessageBox.Show($"An object with the name {inputForm.Input} or hash 0x{inputHash:x8} already exists", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        var newObject = selectedObject.Clone() as IObject<ObjectData>;
+
+        if (newObject is null)
+            return;
+
+        newObject.Name = inputForm.Input;
+        newObject.NameHash = inputHash;
+
+        var guid = selectedObject.Guid;
+
+        while (_currentPackage.Objects.Find(x => x.Guid == guid) is not null)
+        {
+            guid++;
+        }
+
+        newObject.Guid = guid;
+
+        foreach (var targetList in _currentPackage.MessageTargetLists)
+        {
+            if (targetList.Targets.Contains(selectedObject.Guid))
+                targetList.Targets.Add(newObject.Guid);
+        }
+
+        _currentPackage.ResourceRequests.Add(newObject.ResourceRequest);
+        _currentPackage.Objects.Add(newObject);
+
         CurrentPackageWasModified();
     }
 

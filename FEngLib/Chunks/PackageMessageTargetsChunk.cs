@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using FEngLib.Messaging;
 using FEngLib.Packages;
@@ -18,17 +18,19 @@ public class PackageMessageTargetsChunk : FrontendChunk
         while (tagStream.HasTag())
         {
             var tag = tagStream.NextTag();
-            ProcessTag(tag);
+            ProcessTag(package, tag);
         }
     }
 
-    private void ProcessTag(Tag tag)
+    private void ProcessTag(Package package, Tag tag)
     {
         switch (tag)
         {
             // These are not really important to us. They are also trivial to regenerate.
             case MessageTargetCountTag:
-            case MessageTargetListTag:
+                break;
+            case MessageTargetListTag messageTargetListTag:
+                package.MessageTargetLists.Add(messageTargetListTag.Targets);
                 break;
             default:
                 throw new Exception($"Unexpected tag in MessageTargets: {tag.GetType()}");
