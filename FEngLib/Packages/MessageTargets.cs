@@ -10,6 +10,12 @@ public class MessageTargets : ICloneable
         Targets = new List<uint>();
     }
 
+    public MessageTargets(uint msgId, List<uint> targets)
+    {
+        MsgId = msgId;
+        Targets = targets;
+    }
+
 	public object Clone()
 	{
 		var result = new MessageTargets();

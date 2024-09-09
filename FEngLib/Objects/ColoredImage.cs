@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using FEngLib.Scripts;
 using FEngLib.Structures;
 using FEngLib.Utils;
@@ -71,7 +71,11 @@ public class ColoredImage : Image<ColoredImageData, ImageScript<ColoredImageScri
 {
     public ColoredImage(ColoredImageData data) : base(data)
     {
-        Type = ObjectType.ColoredImage;
+    }
+
+    public override ObjectType GetObjectType()
+    {
+        return ObjectType.ColoredImage;
     }
 
     public override void InitializeData()

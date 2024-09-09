@@ -31,245 +31,335 @@ namespace FEngViewer
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.treeView1 = new System.Windows.Forms.TreeView();
-            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.viewOutput = new FEngViewer.GLRenderControl();
-            this.labelCoordDisplay = new System.Windows.Forms.Label();
-            this.groupBgColor = new System.Windows.Forms.GroupBox();
-            this.radioBgGreen = new System.Windows.Forms.RadioButton();
-            this.radioBgBlack = new System.Windows.Forms.RadioButton();
-            this.objectPropertyGrid = new System.Windows.Forms.PropertyGrid();
-            this.colorDialog1 = new System.Windows.Forms.ColorDialog();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.OpenFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.SaveFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.objectContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.scriptContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.toggleScriptItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
-            this.splitContainer2.Panel1.SuspendLayout();
-            this.splitContainer2.Panel2.SuspendLayout();
-            this.splitContainer2.SuspendLayout();
-            this.groupBgColor.SuspendLayout();
-            this.menuStrip1.SuspendLayout();
-            this.objectContextMenu.SuspendLayout();
-            this.scriptContextMenu.SuspendLayout();
-            this.SuspendLayout();
+            components = new System.ComponentModel.Container();
+            splitContainer1 = new SplitContainer();
+            treeView1 = new TreeView();
+            splitContainer2 = new SplitContainer();
+            trackEditorControl = new TrackEditorControl();
+            viewOutputControlPanel = new Panel();
+            labelCoordDisplay = new Label();
+            groupBgColor = new GroupBox();
+            radioBgGreen = new RadioButton();
+            radioBgBlack = new RadioButton();
+            viewOutput = new GLRenderControl();
+            objectPropertyGrid = new PropertyGrid();
+            colorDialog1 = new ColorDialog();
+            menuStrip1 = new MenuStrip();
+            fileToolStripMenuItem = new ToolStripMenuItem();
+            OpenFileMenuItem = new ToolStripMenuItem();
+            SaveFileMenuItem = new ToolStripMenuItem();
+            objectContextMenu = new ContextMenuStrip(components);
+            deleteToolStripMenuItem = new ToolStripMenuItem();
+            scriptContextMenu = new ContextMenuStrip(components);
+            toggleScriptItem = new ToolStripMenuItem();
+            toolStrip1 = new ToolStrip();
+            toolStripPausePlayButton = new ToolStripButton();
+            toolStripSeparator1 = new ToolStripSeparator();
+            toolStripLabel1 = new ToolStripLabel();
+            toolStripScriptSpeedCombox = new ToolStripComboBox();
+            statusStrip1 = new StatusStrip();
+            toolStripStatusLabel1 = new ToolStripStatusLabel();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer2).BeginInit();
+            splitContainer2.Panel1.SuspendLayout();
+            splitContainer2.Panel2.SuspendLayout();
+            splitContainer2.SuspendLayout();
+            viewOutputControlPanel.SuspendLayout();
+            groupBgColor.SuspendLayout();
+            menuStrip1.SuspendLayout();
+            objectContextMenu.SuspendLayout();
+            scriptContextMenu.SuspendLayout();
+            toolStrip1.SuspendLayout();
+            statusStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // splitContainer1
             // 
-            this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.splitContainer1.Location = new System.Drawing.Point(0, 31);
-            this.splitContainer1.Name = "splitContainer1";
+            splitContainer1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            splitContainer1.Location = new System.Drawing.Point(0, 55);
+            splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.treeView1);
+            splitContainer1.Panel1.Controls.Add(treeView1);
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(1499, 1054);
-            this.splitContainer1.SplitterDistance = 429;
-            this.splitContainer1.TabIndex = 0;
+            splitContainer1.Panel2.Controls.Add(splitContainer2);
+            splitContainer1.Size = new System.Drawing.Size(1499, 1060);
+            splitContainer1.SplitterDistance = 429;
+            splitContainer1.TabIndex = 0;
             // 
             // treeView1
             // 
-            this.treeView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView1.Location = new System.Drawing.Point(0, 0);
-            this.treeView1.Name = "treeView1";
-            this.treeView1.Size = new System.Drawing.Size(429, 1054);
-            this.treeView1.TabIndex = 1;
-            this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
-            this.treeView1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.treeView1_MouseDown);
+            treeView1.Dock = DockStyle.Fill;
+            treeView1.Location = new System.Drawing.Point(0, 0);
+            treeView1.Name = "treeView1";
+            treeView1.Size = new System.Drawing.Size(429, 1060);
+            treeView1.TabIndex = 1;
+            treeView1.AfterSelect += treeView1_AfterSelect;
+            treeView1.MouseDown += treeView1_MouseDown;
             // 
             // splitContainer2
             // 
-            this.splitContainer2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
-            this.splitContainer2.Location = new System.Drawing.Point(3, 3);
-            this.splitContainer2.Name = "splitContainer2";
+            splitContainer2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            splitContainer2.FixedPanel = FixedPanel.Panel1;
+            splitContainer2.Location = new System.Drawing.Point(3, 3);
+            splitContainer2.Name = "splitContainer2";
             // 
             // splitContainer2.Panel1
             // 
-            this.splitContainer2.Panel1.Controls.Add(this.viewOutput);
-            this.splitContainer2.Panel1.Controls.Add(this.labelCoordDisplay);
-            this.splitContainer2.Panel1.Controls.Add(this.groupBgColor);
+            splitContainer2.Panel1.Controls.Add(trackEditorControl);
+            splitContainer2.Panel1.Controls.Add(viewOutputControlPanel);
+            splitContainer2.Panel1.Controls.Add(viewOutput);
             // 
             // splitContainer2.Panel2
             // 
-            this.splitContainer2.Panel2.Controls.Add(this.objectPropertyGrid);
-            this.splitContainer2.Size = new System.Drawing.Size(1060, 1051);
-            this.splitContainer2.SplitterDistance = 649;
-            this.splitContainer2.TabIndex = 5;
+            splitContainer2.Panel2.Controls.Add(objectPropertyGrid);
+            splitContainer2.Size = new System.Drawing.Size(1060, 1054);
+            splitContainer2.SplitterDistance = 649;
+            splitContainer2.TabIndex = 5;
             // 
-            // viewOutput
+            // trackEditorControl
             // 
-            this.viewOutput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.viewOutput.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.viewOutput.BackColor = System.Drawing.Color.Black;
-            this.viewOutput.Location = new System.Drawing.Point(3, 2);
-            this.viewOutput.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.viewOutput.MaximumSize = new System.Drawing.Size(640, 480);
-            this.viewOutput.MinimumSize = new System.Drawing.Size(640, 480);
-            this.viewOutput.Name = "viewOutput";
-            this.viewOutput.SelectedNode = null;
-            this.viewOutput.Size = new System.Drawing.Size(640, 480);
-            this.viewOutput.TabIndex = 0;
-            this.viewOutput.TabStop = false;
-            this.viewOutput.MouseClick += new System.Windows.Forms.MouseEventHandler(this.viewOutput_MouseClick);
-            this.viewOutput.MouseMove += new System.Windows.Forms.MouseEventHandler(this.viewOutput_MouseMove);
+            trackEditorControl.Dock = DockStyle.Top;
+            trackEditorControl.Location = new System.Drawing.Point(0, 564);
+            trackEditorControl.MinimumSize = new System.Drawing.Size(649, 150);
+            trackEditorControl.Name = "trackEditorControl";
+            trackEditorControl.Size = new System.Drawing.Size(649, 150);
+            trackEditorControl.TabIndex = 5;
+            // 
+            // viewOutputControlPanel
+            // 
+            viewOutputControlPanel.BorderStyle = BorderStyle.FixedSingle;
+            viewOutputControlPanel.Controls.Add(labelCoordDisplay);
+            viewOutputControlPanel.Controls.Add(groupBgColor);
+            viewOutputControlPanel.Dock = DockStyle.Top;
+            viewOutputControlPanel.Location = new System.Drawing.Point(0, 480);
+            viewOutputControlPanel.Name = "viewOutputControlPanel";
+            viewOutputControlPanel.Size = new System.Drawing.Size(649, 84);
+            viewOutputControlPanel.TabIndex = 4;
             // 
             // labelCoordDisplay
             // 
-            this.labelCoordDisplay.AutoSize = true;
-            this.labelCoordDisplay.Location = new System.Drawing.Point(3, 484);
-            this.labelCoordDisplay.Name = "labelCoordDisplay";
-            this.labelCoordDisplay.Size = new System.Drawing.Size(92, 20);
-            this.labelCoordDisplay.TabIndex = 2;
-            this.labelCoordDisplay.Text = "X:    0   Y:    0";
+            labelCoordDisplay.AutoSize = true;
+            labelCoordDisplay.Location = new System.Drawing.Point(12, 14);
+            labelCoordDisplay.Name = "labelCoordDisplay";
+            labelCoordDisplay.Size = new System.Drawing.Size(72, 15);
+            labelCoordDisplay.TabIndex = 2;
+            labelCoordDisplay.Text = "X:    0   Y:    0";
             // 
             // groupBgColor
             // 
-            this.groupBgColor.Controls.Add(this.radioBgGreen);
-            this.groupBgColor.Controls.Add(this.radioBgBlack);
-            this.groupBgColor.Location = new System.Drawing.Point(489, 484);
-            this.groupBgColor.Name = "groupBgColor";
-            this.groupBgColor.Size = new System.Drawing.Size(154, 58);
-            this.groupBgColor.TabIndex = 3;
-            this.groupBgColor.TabStop = false;
-            this.groupBgColor.Text = "Background";
+            groupBgColor.Controls.Add(radioBgGreen);
+            groupBgColor.Controls.Add(radioBgBlack);
+            groupBgColor.Location = new System.Drawing.Point(486, 14);
+            groupBgColor.Name = "groupBgColor";
+            groupBgColor.Size = new System.Drawing.Size(154, 58);
+            groupBgColor.TabIndex = 3;
+            groupBgColor.TabStop = false;
+            groupBgColor.Text = "Background";
             // 
             // radioBgGreen
             // 
-            this.radioBgGreen.AutoSize = true;
-            this.radioBgGreen.Location = new System.Drawing.Point(77, 26);
-            this.radioBgGreen.Name = "radioBgGreen";
-            this.radioBgGreen.Size = new System.Drawing.Size(69, 24);
-            this.radioBgGreen.TabIndex = 1;
-            this.radioBgGreen.Text = "Green";
-            this.radioBgGreen.UseVisualStyleBackColor = true;
-            this.radioBgGreen.CheckedChanged += new System.EventHandler(this.radioBgBlack_CheckedChanged);
+            radioBgGreen.AutoSize = true;
+            radioBgGreen.Location = new System.Drawing.Point(77, 26);
+            radioBgGreen.Name = "radioBgGreen";
+            radioBgGreen.Size = new System.Drawing.Size(56, 19);
+            radioBgGreen.TabIndex = 1;
+            radioBgGreen.Text = "Green";
+            radioBgGreen.UseVisualStyleBackColor = true;
+            radioBgGreen.CheckedChanged += radioBgBlack_CheckedChanged;
             // 
             // radioBgBlack
             // 
-            this.radioBgBlack.AutoSize = true;
-            this.radioBgBlack.Checked = true;
-            this.radioBgBlack.Location = new System.Drawing.Point(6, 26);
-            this.radioBgBlack.Name = "radioBgBlack";
-            this.radioBgBlack.Size = new System.Drawing.Size(65, 24);
-            this.radioBgBlack.TabIndex = 0;
-            this.radioBgBlack.TabStop = true;
-            this.radioBgBlack.Text = "Black";
-            this.radioBgBlack.UseVisualStyleBackColor = true;
-            this.radioBgBlack.CheckedChanged += new System.EventHandler(this.radioBgBlack_CheckedChanged);
+            radioBgBlack.AutoSize = true;
+            radioBgBlack.Checked = true;
+            radioBgBlack.Location = new System.Drawing.Point(6, 26);
+            radioBgBlack.Name = "radioBgBlack";
+            radioBgBlack.Size = new System.Drawing.Size(53, 19);
+            radioBgBlack.TabIndex = 0;
+            radioBgBlack.TabStop = true;
+            radioBgBlack.Text = "Black";
+            radioBgBlack.UseVisualStyleBackColor = true;
+            radioBgBlack.CheckedChanged += radioBgBlack_CheckedChanged;
+            // 
+            // viewOutput
+            // 
+            viewOutput.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            viewOutput.BackColor = System.Drawing.Color.Black;
+            viewOutput.Dock = DockStyle.Top;
+            viewOutput.Location = new System.Drawing.Point(0, 0);
+            viewOutput.Margin = new Padding(3, 2, 3, 2);
+            viewOutput.MaximumSize = new System.Drawing.Size(649, 480);
+            viewOutput.MinimumSize = new System.Drawing.Size(649, 480);
+            viewOutput.Name = "viewOutput";
+            viewOutput.PlaySpeed = 0F;
+            viewOutput.SelectedNode = null;
+            viewOutput.Size = new System.Drawing.Size(649, 480);
+            viewOutput.TabIndex = 0;
+            viewOutput.TabStop = false;
+            viewOutput.MouseClick += viewOutput_MouseClick;
+            viewOutput.MouseMove += viewOutput_MouseMove;
             // 
             // objectPropertyGrid
             // 
-            this.objectPropertyGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.objectPropertyGrid.Location = new System.Drawing.Point(3, 3);
-            this.objectPropertyGrid.Name = "objectPropertyGrid";
-            this.objectPropertyGrid.Size = new System.Drawing.Size(401, 1044);
-            this.objectPropertyGrid.TabIndex = 4;
+            objectPropertyGrid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            objectPropertyGrid.Location = new System.Drawing.Point(3, 3);
+            objectPropertyGrid.Name = "objectPropertyGrid";
+            objectPropertyGrid.Size = new System.Drawing.Size(401, 1044);
+            objectPropertyGrid.TabIndex = 4;
             // 
             // menuStrip1
             // 
-            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.OpenFileMenuItem,
-            this.SaveFileMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1499, 28);
-            this.menuStrip1.TabIndex = 4;
-            this.menuStrip1.Text = "menuStrip1";
+            menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem });
+            menuStrip1.Location = new System.Drawing.Point(0, 0);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Size = new System.Drawing.Size(1499, 24);
+            menuStrip1.TabIndex = 4;
+            menuStrip1.Text = "menuStrip1";
+            // 
+            // fileToolStripMenuItem
+            // 
+            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { OpenFileMenuItem, SaveFileMenuItem });
+            fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            fileToolStripMenuItem.Text = "File";
             // 
             // OpenFileMenuItem
             // 
-            this.OpenFileMenuItem.Name = "OpenFileMenuItem";
-            this.OpenFileMenuItem.Size = new System.Drawing.Size(59, 24);
-            this.OpenFileMenuItem.Text = "Open";
-            this.OpenFileMenuItem.Click += new System.EventHandler(this.OpenFileMenuItem_Click);
+            OpenFileMenuItem.Name = "OpenFileMenuItem";
+            OpenFileMenuItem.ShortcutKeys = Keys.Control | Keys.O;
+            OpenFileMenuItem.Size = new System.Drawing.Size(146, 22);
+            OpenFileMenuItem.Text = "Open";
+            OpenFileMenuItem.Click += OpenFileMenuItem_Click;
             // 
             // SaveFileMenuItem
             // 
-            this.SaveFileMenuItem.Name = "SaveFileMenuItem";
-            this.SaveFileMenuItem.Size = new System.Drawing.Size(54, 24);
-            this.SaveFileMenuItem.Text = "Save";
-            this.SaveFileMenuItem.Click += new System.EventHandler(this.SaveFileMenuItem_Click);
+            SaveFileMenuItem.Name = "SaveFileMenuItem";
+            SaveFileMenuItem.ShortcutKeys = Keys.Control | Keys.S;
+            SaveFileMenuItem.Size = new System.Drawing.Size(146, 22);
+            SaveFileMenuItem.Text = "Save";
+            SaveFileMenuItem.Click += SaveFileMenuItem_Click;
             // 
             // objectContextMenu
             // 
-            this.objectContextMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.objectContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.deleteToolStripMenuItem});
-            this.objectContextMenu.Name = "objectContextMenu";
-            this.objectContextMenu.Size = new System.Drawing.Size(211, 110);
-            // 
-            // scriptContextMenu
-            // 
-            this.scriptContextMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.scriptContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toggleScriptItem});
-            this.scriptContextMenu.Name = "scriptContextMenu";
-            this.scriptContextMenu.Size = new System.Drawing.Size(212, 28);
-            // 
-            // toggleScriptItem
-            // 
-            this.toggleScriptItem.Name = "toggleScriptItem";
-            this.toggleScriptItem.Size = new System.Drawing.Size(211, 24);
-            this.toggleScriptItem.Text = "toolStripMenuItem1";
-            this.toggleScriptItem.Click += new System.EventHandler(this.toggleScriptItem_Click);
-            
+            objectContextMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
+            objectContextMenu.Items.AddRange(new ToolStripItem[] { deleteToolStripMenuItem });
+            objectContextMenu.Name = "objectContextMenu";
+            objectContextMenu.Size = new System.Drawing.Size(108, 26);
             // 
             // deleteToolStripMenuItem
             // 
-            this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
-            this.deleteToolStripMenuItem.Text = "Delete";
-            this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
+            deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
+            deleteToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            deleteToolStripMenuItem.Text = "Delete";
+            deleteToolStripMenuItem.Click += deleteToolStripMenuItem_Click;
+            // 
+            // scriptContextMenu
+            // 
+            scriptContextMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
+            scriptContextMenu.Items.AddRange(new ToolStripItem[] { toggleScriptItem });
+            scriptContextMenu.Name = "scriptContextMenu";
+            scriptContextMenu.Size = new System.Drawing.Size(181, 26);
+            // 
+            // toggleScriptItem
+            // 
+            toggleScriptItem.Name = "toggleScriptItem";
+            toggleScriptItem.Size = new System.Drawing.Size(180, 22);
+            toggleScriptItem.Text = "toolStripMenuItem1";
+            toggleScriptItem.Click += toggleScriptItem_Click;
+            // 
+            // toolStrip1
+            // 
+            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripPausePlayButton, toolStripSeparator1, toolStripLabel1, toolStripScriptSpeedCombox });
+            toolStrip1.Location = new System.Drawing.Point(0, 24);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new System.Drawing.Size(1499, 25);
+            toolStrip1.TabIndex = 5;
+            toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripPausePlayButton
+            // 
+            toolStripPausePlayButton.Enabled = false;
+            toolStripPausePlayButton.Image = Properties.Resources.Action_Pause;
+            toolStripPausePlayButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            toolStripPausePlayButton.Name = "toolStripPausePlayButton";
+            toolStripPausePlayButton.Size = new System.Drawing.Size(58, 22);
+            toolStripPausePlayButton.Text = "Pause";
+            toolStripPausePlayButton.Click += toolStripPausePlayButton_Click;
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolStripLabel1
+            // 
+            toolStripLabel1.Name = "toolStripLabel1";
+            toolStripLabel1.Size = new System.Drawing.Size(39, 22);
+            toolStripLabel1.Text = "Speed";
+            // 
+            // toolStripScriptSpeedCombox
+            // 
+            toolStripScriptSpeedCombox.DropDownStyle = ComboBoxStyle.DropDownList;
+            toolStripScriptSpeedCombox.Name = "toolStripScriptSpeedCombox";
+            toolStripScriptSpeedCombox.Size = new System.Drawing.Size(121, 25);
+            // 
+            // statusStrip1
+            // 
+            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1 });
+            statusStrip1.Location = new System.Drawing.Point(0, 1130);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Size = new System.Drawing.Size(1499, 22);
+            statusStrip1.SizingGrip = false;
+            statusStrip1.TabIndex = 6;
+            statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabel1
+            // 
+            toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            toolStripStatusLabel1.Size = new System.Drawing.Size(113, 17);
+            toolStripStatusLabel1.Text = "Testing, testing, 123!";
             // 
             // PackageView
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
-            this.ClientSize = new System.Drawing.Size(1499, 1152);
-            this.Controls.Add(this.menuStrip1);
-            this.Controls.Add(this.splitContainer1);
-            this.Name = "PackageView";
-            this.Text = "FEngViewer";
-            this.Load += new System.EventHandler(this.PackageView_Load);
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
-            this.splitContainer2.Panel1.ResumeLayout(false);
-            this.splitContainer2.Panel1.PerformLayout();
-            this.splitContainer2.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
-            this.splitContainer2.ResumeLayout(false);
-            this.groupBgColor.ResumeLayout(false);
-            this.groupBgColor.PerformLayout();
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
-            this.objectContextMenu.ResumeLayout(false);
-            this.scriptContextMenu.ResumeLayout(false);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleMode = AutoScaleMode.Inherit;
+            BackColor = System.Drawing.SystemColors.ControlLight;
+            ClientSize = new System.Drawing.Size(1499, 1152);
+            Controls.Add(statusStrip1);
+            Controls.Add(toolStrip1);
+            Controls.Add(menuStrip1);
+            Controls.Add(splitContainer1);
+            Name = "PackageView";
+            Text = "FEngViewer";
+            Load += PackageView_Load;
+            splitContainer1.Panel1.ResumeLayout(false);
+            splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
+            splitContainer1.ResumeLayout(false);
+            splitContainer2.Panel1.ResumeLayout(false);
+            splitContainer2.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitContainer2).EndInit();
+            splitContainer2.ResumeLayout(false);
+            viewOutputControlPanel.ResumeLayout(false);
+            viewOutputControlPanel.PerformLayout();
+            groupBgColor.ResumeLayout(false);
+            groupBgColor.PerformLayout();
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
+            objectContextMenu.ResumeLayout(false);
+            scriptContextMenu.ResumeLayout(false);
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            statusStrip1.ResumeLayout(false);
+            statusStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -279,8 +369,6 @@ namespace FEngViewer
         private System.Windows.Forms.ColorDialog colorDialog1;
         private System.Windows.Forms.Label labelCoordDisplay;
         private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem OpenFileMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem SaveFileMenuItem;
         private System.Windows.Forms.TreeView treeView1;
         private System.Windows.Forms.ContextMenuStrip objectContextMenu;
         private System.Windows.Forms.ContextMenuStrip scriptContextMenu;
@@ -291,5 +379,17 @@ namespace FEngViewer
         private System.Windows.Forms.PropertyGrid objectPropertyGrid;
         private SplitContainer splitContainer2;
         private ToolStripMenuItem deleteToolStripMenuItem;
+        private ToolStripMenuItem fileToolStripMenuItem;
+        private ToolStripMenuItem OpenFileMenuItem;
+        private ToolStripMenuItem SaveFileMenuItem;
+        private ToolStrip toolStrip1;
+        private StatusStrip statusStrip1;
+        private ToolStripStatusLabel toolStripStatusLabel1;
+        private ToolStripButton toolStripPausePlayButton;
+        private ToolStripComboBox toolStripScriptSpeedCombox;
+        private ToolStripSeparator toolStripSeparator1;
+        private ToolStripLabel toolStripLabel1;
+        private Panel viewOutputControlPanel;
+        private TrackEditorControl trackEditorControl;
     }
 }

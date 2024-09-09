@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Xml.Linq;
 using FEngLib.Scripts;
 using FEngLib.Utils;
+using System;
 
 namespace FEngLib.Objects;
 
@@ -84,7 +85,11 @@ public class Image : Image<ImageData, ImageScript<ImageScriptTracks>>
 {
 	public Image(ImageData data) : base(data)
 	{
-		Type = ObjectType.Image;
+	}
+
+	public override ObjectType GetObjectType()
+	{
+		return ObjectType.Image;
 	}
 
 	public override object Clone()
@@ -102,7 +107,7 @@ public interface IImage<out TData> : IObject<TData> where TData : ImageData
 	uint ImageFlags { get; set; }
 }
 
-public class Image<TData, TScript> : BaseObject<TData, TScript>, IImage<TData>
+public abstract class Image<TData, TScript> : BaseObject<TData, TScript>, IImage<TData>
 	where TData : ImageData, new() where TScript : Script, new()
 {
 	protected Image(TData data) : base(data)
@@ -124,11 +129,11 @@ public class Image<TData, TScript> : BaseObject<TData, TScript>, IImage<TData>
 
 	public override object Clone()
 	{
-		var result = new Image<TData, TScript>(null);
+		// var result = new Image<TData, TScript>(null);
+		// result.InternalClone(this);
+		// return result;
 
-		result.InternalClone(this);
-
-		return result;
+		return this.MemberwiseClone();
 	}
 
 	public uint ImageFlags { get; set; }

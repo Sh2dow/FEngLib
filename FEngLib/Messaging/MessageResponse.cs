@@ -1,4 +1,3 @@
-using FEngLib.Packages;
 using System;
 using System.Collections.Generic;
 
@@ -6,10 +5,16 @@ namespace FEngLib.Messaging;
 
 public class MessageResponse : ICloneable
 {
-    public MessageResponse()
-    {
-        Responses = new List<Response>();
-    }
+	public MessageResponse()
+	{
+		Responses = new List<ResponseCommand>();
+	}
+
+	public MessageResponse(uint id, List<ResponseCommand> responses)
+	{
+		Id = id;
+		Responses = responses;
+	}
 
 	public object Clone()
 	{
@@ -19,12 +24,12 @@ public class MessageResponse : ICloneable
 
 		foreach (var response in this.Responses)
 		{
-			result.Responses.Add(response?.Clone() as Response);
+			result.Responses.Add(response?.Clone() as ResponseCommand);
 		}
 
 		return result;
 	}
 
 	public uint Id { get; set; }
-    public List<Response> Responses { get; set; }
+	public List<ResponseCommand> Responses { get; set; }
 }

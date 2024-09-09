@@ -4,6 +4,10 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
+    <Authors>heyitsleo;Fridtjof</Authors>
+    <Company>NFSTools</Company>
+    <Description>GUI for previewing and editing FNGs</Description>
+    <Version>2.0.0-alpha</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -41,6 +45,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\FngMessages.txt" />
+    <EmbeddedResource Include="Resources\FngObjects.txt" />
+    <EmbeddedResource Include="Resources\FngScripts.txt" />
   </ItemGroup>
 
 </Project>

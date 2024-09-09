@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using FEngLib.Messaging;
 using FEngLib.Packages;
 using FEngLib.Packages.Tags;
@@ -11,35 +12,31 @@ public class PackageMessageTargetsChunk : FrontendChunk
     public override void Read(Package package, FrontendChunkBlock chunkBlock,
         FrontendChunkReader chunkReader, BinaryReader reader)
     {
-        var tagProcessor = new MessageResponseTagProcessor<Package>();
         TagStream tagStream = new MessageTagStream(reader,
             chunkBlock.Size);
 
         while (tagStream.HasTag())
         {
             var tag = tagStream.NextTag();
-            ProcessTag(tagProcessor, package, tag);
+            ProcessTag(tag);
         }
     }
 
-    private void ProcessTag(MessageResponseTagProcessor<Package> messageResponseTagProcessor, Package package, Tag tag)
+    private void ProcessTag(Tag tag)
     {
         switch (tag)
         {
-            // TODO: do we want to use these for data validation?
+            // These are not really important to us. They are also trivial to regenerate.
             case MessageTargetCountTag:
-                break;
-            case MessageTargetListTag messageTargetListTag:
-                package.MessageTargetLists.Add(messageTargetListTag.Targets);
+            case MessageTargetListTag:
                 break;
             default:
-                messageResponseTagProcessor.ProcessTag(package, tag);
-                break;
+                throw new Exception($"Unexpected tag in MessageTargets: {tag.GetType()}");
         }
     }
 
     public override FrontendChunkType GetChunkType()
     {
-        return FrontendChunkType.PackageResponses;
+        return FrontendChunkType.Targets;
     }
 }

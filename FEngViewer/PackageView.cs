@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Windows.Forms;
 using CommandLine;
 using FEngLib;
+using FEngLib.Messaging;
+using FEngLib.Messaging.Commands;
 using FEngLib.Objects;
 using FEngLib.Packages;
 using FEngLib.Scripts;
@@ -19,10 +22,27 @@ namespace FEngViewer;
 
 public partial class PackageView : Form
 {
+    private static readonly HashList _objHashList;
+    private static readonly HashList _scriptHashList;
+    private static HashList _msgHashList;
     private Package _currentPackage;
     private RenderTree _currentRenderTree;
 
     private TreeNode _rootNode;
+    private Dictionary<RenderTreeNode, int> _savedScriptTimes = new Dictionary<RenderTreeNode, int>();
+
+    static PackageView()
+    {
+        _objHashList = HashList.FromEmbeddedFile("FEngViewer.Resources.FngObjects.txt");
+        _scriptHashList = HashList.FromEmbeddedFile("FEngViewer.Resources.FngScripts.txt");
+        _msgHashList = HashList.FromEmbeddedFile("FEngViewer.Resources.FngMessages.txt");
+    }
+
+    public record ScriptSpeedOption(float Value)
+    {
+        [UsedImplicitly]
+        public string Description => $"{Value}x";
+    }
 
     public PackageView()
     {
@@ -44,7 +64,29 @@ public partial class PackageView : Form
         imageList.Images.Add("TreeItem_GenericResource", Resources.TreeItem_GenericResource);
         imageList.Images.Add("TreeItem_Font", Resources.TreeItem_Font);
         imageList.Images.Add("TreeItem_Keyframe", Resources.TreeItem_Keyframe);
+        imageList.Images.Add("TreeItem_SimpleImage", Resources.TreeItem_SimpleImage);
+        imageList.Images.Add("TreeItem_Message", Resources.TreeItem_Message);
+        imageList.Images.Add("TreeItem_MessageResponse", Resources.TreeItem_MessageResponse);
         treeView1.ImageList = imageList;
+
+        toolStripStatusLabel1.Text = "Ready";
+        toolStripScriptSpeedCombox.SelectedIndexChanged += (o, e) =>
+        {
+            viewOutput.PlaySpeed = ((ScriptSpeedOption)toolStripScriptSpeedCombox.ComboBox!.SelectedItem).Value;
+        };
+        toolStripScriptSpeedCombox.Items.AddRange(new object[] { new ScriptSpeedOption(0.5f), new ScriptSpeedOption(1.0f), new ScriptSpeedOption(2.0f) });
+        toolStripScriptSpeedCombox.ComboBox!.DisplayMember = "Description";
+        toolStripScriptSpeedCombox.ComboBox!.ValueMember = null;
+        toolStripScriptSpeedCombox.SelectedIndex = 1; // 1.0x default speed
+
+        viewOutput.FrameRender += () => trackEditorControl.UpdateData();
+        trackEditorControl.OnTimeChanged += time =>
+        {
+            if (!_savedScriptTimes.ContainsKey(trackEditorControl.SelectedNode))
+                _savedScriptTimes[trackEditorControl.SelectedNode] = trackEditorControl.SelectedNode.GetScriptTime();
+            trackEditorControl.SelectedNode.SetScriptTime(time);
+            viewOutput.RefreshInstant();
+        };
     }
 
     private void PackageView_Load(object sender, EventArgs e)
@@ -88,6 +130,15 @@ public partial class PackageView : Form
             };
         }
 
+        var packageMsgList = _rootNode.Nodes.Add("Messages");
+        packageMsgList.ImageKey = packageMsgList.SelectedImageKey = "TreeItem_Message";
+        foreach (var messageDefinition in package.MessageDefinitions)
+        {
+            var node = packageMsgList.Nodes.Add($"{messageDefinition.Name} (cat: {messageDefinition.Category})");
+            node.ImageKey = node.SelectedImageKey = "TreeItem_Message";
+        }
+        CreateMessageResponsesList(_rootNode.Nodes, package);
+
         //var objectListNode = rootNode.Nodes.Add("Objects");
         //objectListNode.ImageKey = "TreeItem_ObjectList";
         ApplyObjectsToTreeNodes(feObjectNodes, _rootNode.Nodes);
@@ -99,7 +150,7 @@ public partial class PackageView : Form
         treeView1.SelectedNode = _rootNode;
     }
 
-    private static void ApplyObjectsToTreeNodes(IEnumerable<RenderTreeNode> objectNodes,
+    private void ApplyObjectsToTreeNodes(IEnumerable<RenderTreeNode> objectNodes,
         TreeNodeCollection treeNodes)
     {
         foreach (var feObjectNode in objectNodes)
@@ -110,10 +161,10 @@ public partial class PackageView : Form
         }
     }
 
-    private static TreeNode CreateObjectTreeNode(TreeNodeCollection collection, RenderTreeNode viewNode)
+    private TreeNode CreateObjectTreeNode(TreeNodeCollection collection, RenderTreeNode viewNode)
     {
         var feObj = viewNode.GetObject();
-        var nodeImageKey = feObj.Type switch
+        var nodeImageKey = feObj.GetObjectType() switch
         {
             ObjectType.String => "TreeItem_String",
             ObjectType.Image => "TreeItem_Image",
@@ -121,37 +172,47 @@ public partial class PackageView : Form
             ObjectType.Movie => "TreeItem_Movie",
             ObjectType.ColoredImage => "TreeItem_ColoredImage",
             ObjectType.MultiImage => "TreeItem_MultiImage",
+            ObjectType.SimpleImage => "TreeItem_SimpleImage",
             _ => null
         };
 
-        var nodeText = $"{feObj.Name ?? feObj.NameHash.ToString("X")}";
+        // var nodeText = $"{feObj.Name ?? feObj.NameHash.ToString("X")}";
+        var nodeText = feObj.Name ?? _objHashList.Lookup(feObj.NameHash);
 
         if (nodeImageKey == null)
         {
-            nodeText = feObj.Type + " " + nodeText;
+            nodeText = feObj.GetObjectType() + " " + nodeText;
         }
 
-        var objTreeNode = collection.Add(nodeText);
+        var objTreeNode = collection.Add("");
         objTreeNode.Tag = viewNode;
         objTreeNode.Name = nodeText;
         if (nodeImageKey != null) objTreeNode.ImageKey = objTreeNode.SelectedImageKey = nodeImageKey;
+        objTreeNode.NodeFont = new Font(treeView1.Font, feObj.Name == null ? FontStyle.Regular : FontStyle.Bold);
+        objTreeNode.Text = nodeText;
 
-        foreach (var script in feObj.GetScripts()) CreateScriptTreeNode(objTreeNode.Nodes, script);
+        var scriptsTreeNode = objTreeNode.Nodes.Add("Scripts");
+        scriptsTreeNode.ImageKey = scriptsTreeNode.SelectedImageKey = "TreeItem_Script";
+        foreach (var script in feObj.GetScripts()) CreateScriptTreeNode(scriptsTreeNode.Nodes, script);
 
+        CreateMessageResponsesList(objTreeNode.Nodes, feObj);
         return objTreeNode;
     }
 
-    private static void CreateScriptTreeNode(TreeNodeCollection collection, Script script)
+    private void CreateScriptTreeNode(TreeNodeCollection collection, Script script)
     {
-        var node = collection.Add(script.Name ?? $"0x{script.Id:X}");
+        var nodeText = script.Name ?? _scriptHashList.Lookup(script.Id);
+        var node = collection.Add("");
         // ReSharper disable once LocalizableElement
         node.ImageKey = node.SelectedImageKey = "TreeItem_Script";
         node.Tag = script;
+        node.NodeFont = new Font(treeView1.Font, script.Name == null ? FontStyle.Regular : FontStyle.Bold);
+        node.Text = nodeText;
 
         foreach (var scriptEvent in script.Events)
         {
             var eventNode =
-                node.Nodes.Add($"0x{scriptEvent.EventId:X} -> {scriptEvent.Target:X} @ T={scriptEvent.Time}");
+                node.Nodes.Add($"{_msgHashList.Lookup(scriptEvent.EventId)} -> {ResolveObjectGuid(scriptEvent.Target)} @ T={scriptEvent.Time}");
             eventNode.ImageKey = eventNode.SelectedImageKey = "TreeItem_ScriptEvent";
         }
 
@@ -181,38 +242,82 @@ public partial class PackageView : Form
         }
     }
 
-    private static void CreateTrackNode(TreeNode scriptNode, Track track, string name)
+    private void CreateTrackNode(TreeNode scriptNode, Track track, string name)
     {
         if (track == null)
             return;
 
-        var trackNode = scriptNode.Nodes.Add(name);
-        trackNode.ImageKey = trackNode.SelectedImageKey = "TreeItem_ScriptTrack";
+        var trackTreeNode = scriptNode.Nodes.Add(name);
+        trackTreeNode.ImageKey = trackTreeNode.SelectedImageKey = "TreeItem_ScriptTrack";
+        trackTreeNode.Tag = track;
 
-        void AddNodeKey(int time, object value)
+        void AddNodeKey(int time, TrackNode trackNode)
         {
-            var node = trackNode.Nodes.Add($"T={time}: {value}");
-            node.ImageKey = node.SelectedImageKey = "TreeItem_Keyframe";
-            ;
+            var nodeTreeNode = trackTreeNode.Nodes.Add($"T={time}: {trackNode.GetValue()}");
+            nodeTreeNode.ImageKey = nodeTreeNode.SelectedImageKey = "TreeItem_Keyframe";
+            nodeTreeNode.Tag = trackNode;
         }
 
         switch (track)
         {
             case Vector2Track vector2Track:
-                foreach (var deltaKey in vector2Track.DeltaKeys) AddNodeKey(deltaKey.Time, deltaKey.Val);
+                //AddNodeKey(-1, vector2Track.BaseKey);
+                foreach (var deltaKey in vector2Track.DeltaKeys) AddNodeKey(deltaKey.Time, deltaKey);
                 break;
             case Vector3Track vector3Track:
-                foreach (var deltaKey in vector3Track.DeltaKeys) AddNodeKey(deltaKey.Time, deltaKey.Val);
+                //AddNodeKey(-1, vector3Track.BaseKey);
+                foreach (var deltaKey in vector3Track.DeltaKeys) AddNodeKey(deltaKey.Time, deltaKey);
                 break;
             case QuaternionTrack quaternionTrack:
-                foreach (var deltaKey in quaternionTrack.DeltaKeys) AddNodeKey(deltaKey.Time, deltaKey.Val);
+                //AddNodeKey(-1, quaternionTrack.BaseKey);
+                foreach (var deltaKey in quaternionTrack.DeltaKeys) AddNodeKey(deltaKey.Time, deltaKey);
                 break;
             case ColorTrack colorTrack:
-                foreach (var deltaKey in colorTrack.DeltaKeys) AddNodeKey(deltaKey.Time, deltaKey.Val);
+                //AddNodeKey(-1, colorTrack.BaseKey);
+                foreach (var deltaKey in colorTrack.DeltaKeys) AddNodeKey(deltaKey.Time, deltaKey);
                 break;
             default:
                 throw new NotImplementedException($"Unsupported: {track.GetType()}");
         }
+    }
+
+    private void CreateMessageResponsesList(TreeNodeCollection collection, IHaveMessageResponses responsesContainer)
+    {
+        var rootNode = collection.Add("Message Responses");
+        rootNode.ImageKey = rootNode.SelectedImageKey = "TreeItem_MessageResponse";
+        foreach (var message in responsesContainer.MessageResponses)
+        {
+            var messageNode = rootNode.Nodes.Add(_msgHashList.Lookup(message.Id));
+            messageNode.ImageKey = messageNode.SelectedImageKey = "TreeItem_Message";
+            foreach (var response in message.Responses)
+            {
+                var respNode = messageNode.Nodes.Add(DescribeMessageResponse(response));
+                respNode.ImageKey = respNode.SelectedImageKey = "TreeItem_MessageResponse";
+            }
+        }
+    }
+
+    private string DescribeMessageResponse(ResponseCommand response)
+    {
+        return response switch
+        {
+            SetScript setScript => $"SetScript({_scriptHashList.Lookup(setScript.ScriptHash)})",
+            ITargetedCommand targetedCommand and MessageCommand messageCommand =>
+                $"{response.GetCommandName()}({ResolveObjectGuid(targetedCommand.Target)}, {_msgHashList.Lookup(messageCommand.MessageHash)})",
+            ObjectCommand objectCommand => $"{response.GetCommandName()}({ResolveObjectGuid(objectCommand.ObjectGuid)})",
+            ScriptCommand scriptCommand => $"{response.GetCommandName()}({_scriptHashList.Lookup(scriptCommand.ScriptHash)})",
+            _ => response.ToString()
+        };
+    }
+
+    private string ResolveObjectGuid(uint guid)
+    {
+        if (_currentPackage.Objects.Find(o => o.Guid == guid) is { } foundObject)
+        {
+            return foundObject.Name ?? _objHashList.Lookup(foundObject.NameHash);
+        }
+
+        return $"0x{guid:X}";
     }
 
     private void SavePackageToChunk(string path)
@@ -243,9 +348,45 @@ public partial class PackageView : Form
                 Text t => new TextObjectViewWrapper(t),
                 Image i => new ImageObjectViewWrapper(i),
                 ColoredImage ci => new ColoredImageObjectViewWrapper(ci),
+                MultiImage mi => new MultiImageObjectViewWrapper(mi),
                 _ => new DefaultObjectViewWrapper(wrappedObject)
             };
-            Render();
+
+            trackEditorControl.SelectedNode = viewNode;
+        }
+        else
+        {
+            trackEditorControl.SelectedNode = null;
+            if (e.Node?.Tag is Script script)
+            {
+                // todo: this is ugly. fix this stupid tree node tagging mess you've made
+                var scriptAssociatedNode = (RenderTreeNode)e.Node.Parent.Parent.Tag;
+                objectPropertyGrid.SelectedObject =
+                    new ScriptViewWrapper(script, scriptAssociatedNode.GetObject(), _scriptHashList);
+            }
+            else if (e.Node?.Tag is Track track)
+            {
+                var trackAssociatedScript = (Script)e.Node.Parent.Tag;
+                if (track is ColorTrack colorTrack)
+                    objectPropertyGrid.SelectedObject = new ColorTrackViewWrapper(colorTrack, trackAssociatedScript);
+                else if (track is Vector3Track vector3Track)
+                    objectPropertyGrid.SelectedObject = new Vector3TrackViewWrapper(vector3Track, trackAssociatedScript);
+                else if (track is Vector2Track vector2Track)
+                    objectPropertyGrid.SelectedObject = new Vector2TrackViewWrapper(vector2Track, trackAssociatedScript);
+            }
+            else if (e.Node?.Tag is TrackNode trackNode)
+            {
+                var trackNodeAssociatedTrack = (Track)e.Node.Parent.Tag;
+                if (trackNodeAssociatedTrack is ColorTrack colorTrack)
+                    objectPropertyGrid.SelectedObject =
+                        new ColorDeltaKeyViewWrapper(colorTrack, (TrackNode<Color4>)trackNode);
+                else if (trackNodeAssociatedTrack is Vector3Track vector3Track)
+                    objectPropertyGrid.SelectedObject =
+                        new Vector3DeltaKeyViewWrapper(vector3Track, (TrackNode<Vector3>)trackNode);
+                else if (trackNodeAssociatedTrack is Vector2Track vector2Track)
+                    objectPropertyGrid.SelectedObject =
+                        new Vector2DeltaKeyViewWrapper(vector2Track, (TrackNode<Vector2>)trackNode);
+            }
         }
     }
 
@@ -282,7 +423,7 @@ public partial class PackageView : Form
             var top = candidates.First();
 
             var feObj = top.GetObject();
-            var key = $"{feObj.Name ?? feObj.NameHash.ToString("X")}";
+            var key = feObj.Name ?? _objHashList.Lookup(feObj.NameHash);
             var foundNodes = treeView1.Nodes.Find(key, true);
             treeView1.SelectedNode = foundNodes[0];
             treeView1.Focus();
@@ -309,11 +450,15 @@ public partial class PackageView : Form
     {
         if (string.IsNullOrWhiteSpace(path))
             return;
+        toolStripStatusLabel1.Text = $"Loading: {path}";
         var package = AppService.Instance.LoadFile(path);
 
         viewOutput.Init(Path.Combine(Path.GetDirectoryName(path) ?? "", "textures"));
-
+        toolStripStatusLabel1.Text = path;
         _currentPackage = package;
+        _savedScriptTimes.Clear();
+        AppService.Instance.PlaybackEnabled = true;
+        UpdatePausePlayState();
         CurrentPackageWasModified();
     }
 
@@ -362,7 +507,8 @@ public partial class PackageView : Form
         }
         else if (hit_node?.Tag is Script script)
         {
-            var viewNode = (RenderTreeNode)hit_node.Parent.Tag;
+            // todo: this is ugly. fix this stupid tree node tagging mess you've made
+            var viewNode = (RenderTreeNode)hit_node.Parent.Parent.Tag;
 
             toggleScriptItem.Text = ReferenceEquals(viewNode.GetCurrentScript(), script) ? "Stop" : "Start";
 
@@ -374,7 +520,8 @@ public partial class PackageView : Form
     {
         if (treeView1.SelectedNode?.Tag is Script script)
         {
-            var viewNode = (RenderTreeNode)treeView1.SelectedNode.Parent.Tag;
+            // todo: fix this one too!
+            var viewNode = (RenderTreeNode)treeView1.SelectedNode.Parent.Parent.Tag;
             viewNode.SetCurrentScript(ReferenceEquals(viewNode.GetCurrentScript(), script) ? null : script.Id);
         }
     }
@@ -409,5 +556,34 @@ public partial class PackageView : Form
     private class Options
     {
         [Option('i', "input")] public string InputFile { get; [UsedImplicitly] set; }
+    }
+
+    private void toolStripPausePlayButton_Click(object sender, EventArgs e)
+    {
+        if (!AppService.Instance.PlaybackEnabled)
+        {
+            foreach (var (node, savedScriptTime) in _savedScriptTimes)
+            {
+                node.SetScriptTime(savedScriptTime);
+            }
+            _savedScriptTimes.Clear();
+        }
+        AppService.Instance.PlaybackEnabled = !AppService.Instance.PlaybackEnabled;
+        UpdatePausePlayState();
+    }
+
+    private void UpdatePausePlayState()
+    {
+        toolStripPausePlayButton.Enabled = _currentPackage != null;
+        if (AppService.Instance.PlaybackEnabled)
+        {
+            toolStripPausePlayButton.Text = toolStripPausePlayButton.ToolTipText = "Pause";
+            toolStripPausePlayButton.Image = Resources.Action_Pause;
+        }
+        else
+        {
+            toolStripPausePlayButton.Text = toolStripPausePlayButton.ToolTipText = "Play";
+            toolStripPausePlayButton.Image = Resources.Action_Play;
+        }
     }
 }

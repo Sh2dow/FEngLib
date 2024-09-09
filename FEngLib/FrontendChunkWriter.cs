@@ -86,8 +86,8 @@ public class FrontendChunkWriter
             var usedTypes = new List<ObjectType>();
             Package.Objects.ForEach(o =>
             {
-                if (!usedTypes.Contains(o.Type))
-                    usedTypes.Add(o.Type);
+                if (!usedTypes.Contains(o.GetObjectType()))
+                    usedTypes.Add(o.GetObjectType());
             });
 
             foreach (var type in usedTypes)
@@ -154,7 +154,7 @@ public class FrontendChunkWriter
                 {
                     bw.WriteChunk(FrontendChunkType.ObjectData, bw =>
                     {
-                        bw.WriteTag(FrontendTagType.ObjectType, bw => bw.WriteEnum(obj.Type));
+                        bw.WriteTag(FrontendTagType.ObjectType, bw => bw.WriteEnum(obj.GetObjectType()));
                         if (obj.Name != null)
                         {
                             bw.WriteTag(ObjectName, bw =>
@@ -188,7 +188,7 @@ public class FrontendChunkWriter
                             bw.WriteTag(ObjectParent, bw => bw.Write(obj.Parent.Guid));
                         }
 
-                        switch (obj.Type)
+                        switch (obj.GetObjectType())
                         {
                             case ObjectType.Image:
                                 var img = (IImage<ImageData>)obj;
@@ -231,7 +231,8 @@ public class FrontendChunkWriter
                                 bw.WriteTag(MultiImageTextureFlags3, bw => bw.Write(mImg.TextureFlags3));
                                 break;
                             default:
-                                Console.WriteLine($"!!!!!! idk whether/how to write a {obj.Type}'s specific tags!");
+                                Console.WriteLine(
+                                    $"!!!!!! idk whether/how to write a {obj.GetObjectType()}'s specific tags!");
                                 throw new NotImplementedException();
                         }
 
@@ -381,8 +382,13 @@ public class FrontendChunkWriter
 
         writer.WriteChunk(Targets, bw =>
         {
-            bw.WriteTag(MessageTargetCount, bw => bw.Write(Package.MessageTargetLists.Count));
-            foreach (var targetList in Package.MessageTargetLists)
+            var targetLists = Package.Objects.SelectMany(o => o.MessageResponses.Select(mr => (o.Guid, mr.Id)))
+                .GroupBy(e => e.Id)
+                .Select(g => new MessageTargets(g.Key, g.Select(e => e.Guid).ToList()))
+                .ToList();
+
+            bw.WriteTag(MessageTargetCount, bw => bw.Write(targetLists.Count));
+            foreach (var targetList in targetLists)
             {
                 bw.WriteTag(MessageTargetList, bw =>
                 {
@@ -402,18 +408,26 @@ public class FrontendChunkWriter
         bw.WriteTag(MessageResponseCount, bw => bw.Write(msgr.Responses.Count));
         foreach (var resp in msgr.Responses)
         {
-            bw.WriteTag(ResponseId, bw => bw.Write(resp.Id));
+            bw.WriteTag(ResponseId, bw => bw.Write(resp.GetId()));
 
-            if (resp.IntParam != null)
-                bw.WriteTag(ResponseIntParam, bw => bw.Write(resp.IntParam.Value));
-            else if (resp.StringParam != null)
-                bw.WriteTag(ResponseStringParam, bw =>
-                {
-                    bw.WriteCString(resp.StringParam);
-                    bw.AlignWriter(4);
-                });
+            switch (resp)
+            {
+                case IIntegerCommand integerCommand:
+                    bw.WriteTag(ResponseIntParam, bw => bw.Write(integerCommand.GetParameter()));
+                    break;
+                case IStringCommand stringCommand:
+                    bw.WriteTag(ResponseStringParam, bw =>
+                    {
+                        bw.WriteCString(stringCommand.GetParameter());
+                        bw.AlignWriter(4);
+                    });
+                    break;
+                case NonParameterizedCommand:
+                    bw.WriteTag(ResponseIntParam, bw => bw.Write(0u));
+                    break;
+            }
 
-            bw.WriteTag(ResponseTarget, bw => bw.Write(resp.Target));
+            bw.WriteTag(ResponseTarget, bw => bw.Write(resp is ITargetedCommand targetedCommand ? targetedCommand.Target : 0));
         }
     }
 }
