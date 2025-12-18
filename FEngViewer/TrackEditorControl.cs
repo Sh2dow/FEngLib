@@ -18,7 +18,8 @@ namespace FEngViewer
     {
         public event TimeChanged OnTimeChanged;
 
-        public RenderTreeNode SelectedNode { get; set; }
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public RenderTreeNode SelectedNode { get; set; }
 
         private bool _suppressEventGeneration;
 

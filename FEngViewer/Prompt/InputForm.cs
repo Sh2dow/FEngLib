@@ -1,16 +1,19 @@
 using System;
 using System.Windows.Forms;
+using System.ComponentModel;
 
 namespace FEngViewer.Prompt
 {
 	public partial class InputForm : Form
 	{
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public string Input
 		{
 			get { return TxtInput.Text; }
 			set { TxtInput.Text = value; }
 		}
 
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public bool CreateChildren
 		{
 			get { return ChkChildren.Checked; }

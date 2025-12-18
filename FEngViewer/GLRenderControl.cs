@@ -6,6 +6,7 @@ using FEngRender.Data;
 using FEngRender.GL;
 using JetBrains.Annotations;
 using SharpGL;
+using System.ComponentModel;
 
 namespace FEngViewer;
 
@@ -18,7 +19,7 @@ public partial class GLRenderControl : UserControl, IRenderControl
 
     [CanBeNull] private RenderTree _renderTree;
 
-    public float PlaySpeed { get; set; }
+    private float PlaySpeed { get; set; }
     public event RenderEventHandler FrameRender;
 
     public GLRenderControl()
@@ -27,12 +28,13 @@ public partial class GLRenderControl : UserControl, IRenderControl
         InitializeComponent();
     }
 
-    public Color4 BackgroundColor
+    Color4 IRenderControl.BackgroundColor
     {
-        set => _renderer.SetBackgroundColor(value);
+        set => this._renderer.SetBackgroundColor(value);
     }
 
-    public RenderTreeNode SelectedNode
+	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+	public RenderTreeNode SelectedNode
     {
         get => _renderer.SelectedNode;
         set => _renderer.SelectNode(value);

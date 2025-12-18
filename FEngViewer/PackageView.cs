@@ -1,4 +1,4 @@
-using CommandLine;
+﻿using CommandLine;
 using FEngLib;
 using FEngLib.Messaging;
 using FEngLib.Objects;
@@ -167,7 +167,7 @@ public partial class PackageView : Form
 	private static TreeNode CreateObjectTreeNode(TreeNodeCollection collection, RenderTreeNode viewNode)
 	{
 		var feObj = viewNode.GetObject();
-		var nodeImageKey = feObj.Type switch
+		var nodeImageKey = feObj.GetObjectType() switch
 		{
 			ObjectType.String => "TreeItem_String",
 			ObjectType.Image => "TreeItem_Image",
@@ -211,12 +211,23 @@ public partial class PackageView : Form
 
 		foreach (var message in messageResponse.Responses)
 		{
-			string nameResponse = null;
-			if (message.IntParam.HasValue)
+			string label = null;
+			if (message is IIntegerCommand intCmd)
 			{
-				nameResponse = AppService.Instance.HashResolver.ResolveNameHash(null, message.IntParam.Value);
+				var param = intCmd.GetParameter();
+				label = AppService.Instance.HashResolver.ResolveNameHash(null, param) ??
+				        $"IntParam {param}";
 			}
-			var eventNode = node.Nodes.Add(nameResponse ?? (message.IntParam.HasValue ? "IntParam " + message.IntParam.ToString() : "Id " + message.Id.ToString()));
+			else if (message is IStringCommand strCmd)
+			{
+				label = strCmd.GetParameter();
+			}
+			else
+			{
+				label = $"Id {message.GetId()}";
+			}
+
+			var eventNode = node.Nodes.Add(label);
 			eventNode.ImageKey = eventNode.SelectedImageKey = "TreeItem_Message";
 			eventNode.Tag = message;
 		}
@@ -440,7 +451,7 @@ public partial class PackageView : Form
 				.OrderBy(node => // smallest area first => most "specific" candidate wins
 				{
 					var sz = node.Get2DExtents().Value.Size;
-					return sz.Height * sz.Width; // area 
+					return sz.Height * sz.Width; // area
 				});
 
 			var top = candidates.First();
@@ -679,7 +690,7 @@ public partial class PackageView : Form
 		if (colorDialog.ShowDialog() != DialogResult.OK)
 			return;
 
-		viewOutput.BackgroundColor = new Color4(colorDialog.Color.B, colorDialog.Color.G, colorDialog.Color.R, colorDialog.Color.A);
+		((IRenderControl)this.viewOutput).BackgroundColor = new Color4(colorDialog.Color.B, colorDialog.Color.G, colorDialog.Color.R, colorDialog.Color.A);
 
 		Render();
 	}

@@ -76,7 +76,7 @@ public class AppService
 		package.Objects.ForEach(o =>
 		{
 			o.Name = HashResolver.ResolveNameHash(o.Name, o.NameHash);
-			if (o.Type == ObjectType.String)
+			if (o.GetObjectType() == ObjectType.String)
 				((Text)o).Label = HashResolver.ResolveNameHash(((Text)o).Label, ((Text)o).Hash);
 		});
 
