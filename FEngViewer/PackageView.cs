@@ -1,4 +1,4 @@
-﻿using CommandLine;
+using CommandLine;
 using FEngLib;
 using FEngLib.Messaging;
 using FEngLib.Objects;
@@ -1014,3 +1014,4 @@ public partial class PackageView : Form
 		}
 	}
 }
+

@@ -31,4 +31,13 @@
       </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="compile_fng.bat">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="decompile_fng.bat">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

@@ -8,11 +8,12 @@ namespace FEngLib.Chunks;
 
 public class MessageResponsesDataChunk : FrontendObjectChunk
 {
-    private readonly string _logReference = "Message";
-
-    public MessageResponsesDataChunk(IObject<ObjectData> frontendObject, HashResolver hashResolver) : base(frontendObject, hashResolver)
+    public MessageResponsesDataChunk(IObject<ObjectData> frontendObject, HashResolver hashResolver) :
+        base(frontendObject, hashResolver)
     {
     }
+
+    private readonly string _logReference = "Message";
 
     public override IObject<ObjectData> Read(Package package, ObjectReaderState readerState, BinaryReader reader)
     {
@@ -24,7 +25,8 @@ public class MessageResponsesDataChunk : FrontendObjectChunk
         {
             var tag = tagStream.NextTag();
             tagProcessor.ProcessTag(tag);
-            FrontendObject.Name = HashResolver.ResolveNameHash(FrontendObject.Name, FrontendObject.NameHash, _logReference);
+            FrontendObject.Name =
+                HashResolver.ResolveNameHash(FrontendObject.Name, FrontendObject.NameHash, _logReference);
         }
 
         ResponseHelpers.PopulateMessageResponseList(tagProcessor.MessageResponseEntryList, FrontendObject);
